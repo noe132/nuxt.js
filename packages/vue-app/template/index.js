@@ -104,7 +104,8 @@ async function createApp(ssrContext) {
   // Make app available into store via this.app
   store.app = app
   <% } %>
-  const next = ssrContext ? ssrContext.next : location => app.router.push(location)
+  let cachedLocation
+  const next = ssrContext ? ssrContext.next : location => { cachedLocation = location }
   // Resolve route
   let route
   if (ssrContext) {
@@ -197,6 +198,12 @@ async function createApp(ssrContext) {
           resolve()
         })
       })
+    })
+  }
+
+  if (cachedLocation) {
+    await new Promise(rs => {
+      router.push(cachedLocation, rs, rs)
     })
   }
 
